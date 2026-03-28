@@ -1,10 +1,26 @@
-import dotenv from 'dotenv';
-import express from 'express';  
-dotenv.config();
+import 'dotenv/config';
+import express from 'express';
+import routes from './routes/route.js'
+
+import { db } from './config/db.js'
+
 const app = express()
+
 app.use(express.json());
+app.use('/request', routes);
 
 const port = process.env.PORT;
-app.listen(port,()=>{
-    console.log(`server is listening on port ${port}`);
-})
+
+(async () => {
+  try {
+    const connection = await db.getConnection();
+    console.log("DB connected successfully");
+    connection.release();
+
+    app.listen(port, () => {
+      console.log(`server is listening on port ${port}`);
+    })
+  } catch (err) {
+    console.error("DB connection failed: ", err);
+  }
+})();
